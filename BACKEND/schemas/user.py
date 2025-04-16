@@ -1,27 +1,26 @@
 from pydantic import BaseModel, EmailStr
+from typing import Optional, List
 from datetime import datetime
 
-class UserCreate(BaseModel):
+class UserBase(BaseModel):
     name: str
     email: EmailStr
+
+class UserCreate(UserBase):
     password: str
 
-class UserRead(BaseModel):
+class User(UserBase):
     id: str
-    name: str
-    email: EmailStr
+    created_at: Optional[datetime] 
+    updated_at: Optional[datetime]
 
-    class Config:
+    class config:
         orm_mode = True
 
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
-class JwtResponse(BaseModel):
+class TokenResponseFromAuthApi(BaseModel):
     access_token: str
-    refresh_token: str
-    token_type: str = "bearer"
-
-class RefreshToken(BaseModel):
-    refresh_token: str
+    token_type: str
