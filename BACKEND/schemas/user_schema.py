@@ -3,10 +3,11 @@ from typing import Optional, List
 from datetime import datetime
 
 class UserBase(BaseModel):
-    name: str
+    name: Optional[str] = None
     email: EmailStr
 
 class UserCreate(UserBase):
+    email: EmailStr
     password: str
 
 class User(UserBase):
@@ -21,6 +22,7 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
-class TokenResponseFromAuthApi(BaseModel):
-    access_token: str
-    token_type: str
+
+class UserDelete(BaseModel):
+    email: EmailStr
+    password: str
