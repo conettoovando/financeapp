@@ -1,11 +1,11 @@
 import requests
 import jwt
 from fastapi import Request, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from models.banco import Banco
 from models.cuenta import TipoCuenta, Cuenta
 from models.user import Users
-from schemas.cuenta_schema import CreateCuentaRequest, UpdateCuentaRequest, VerifyToken
+from schemas.cuenta_schema import CreateCuentaRequest, UpdateCuentaRequest, VerifyToken, DeleteCuentaRequest
 from sqlalchemy import select
 
 AUTH_PUBLIC_KEY_URL = "http://localhost:8000/auth/public-key"
@@ -40,7 +40,17 @@ def verify_token(request: Request) -> VerifyToken:
     
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Token invalido o expirado")
-    
+
+def obtener_cuentas(db: Session, user: str):
+    cuentas = db.execute(
+        select(Cuenta)
+        .options(joinedload(Cuenta.banco), joinedload(Cuenta.tipo_cuenta))
+        .filter(Cuenta.user_id == user)
+    ).scalars().all()
+
+    # Falta crear el modelo de retorno de los datos unicamente necesarios. 
+    return cuentas
+
 def crear_cuenta(request: CreateCuentaRequest, db: Session):
     # Validar tipo de cuenta
     tipo_cuenta = db.execute(select(TipoCuenta).filter(TipoCuenta.id == request.tipo_cuenta_id)).scalar_one_or_none()
@@ -92,3 +102,17 @@ def actualizar_cuenta(request: UpdateCuentaRequest, db: Session, user_id: str):
     db.refresh(cuenta)
     
     return cuenta
+
+def eliminar_cuenta(request: DeleteCuentaRequest, db: Session, user_id):
+    cuenta = db.execute(select(Cuenta).filter(Cuenta.id == request.cuenta_id)).scalar_one_or_none()
+
+    if not cuenta:
+        raise HTTPException(status_code=400, detail="Cuenta no encontrada")
+    
+    if cuenta.user_id != user_id:
+        raise authorization_error()
+    
+    db.delete(cuenta)
+    db.commit()
+
+    return {"msg": "Cuenta eliminada con exito"}

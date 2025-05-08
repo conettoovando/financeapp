@@ -25,3 +25,6 @@ class UpdateCuentaRequest(BaseModel):
 
 class VerifyToken(BaseModel):
     user_id: str
+
+class DeleteCuentaRequest(BaseModel):
+    cuenta_id: str
