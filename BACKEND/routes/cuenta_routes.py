@@ -1,8 +1,15 @@
 from fastapi import APIRouter, Depends, Response, Request
+from typing import List
 
 from fastapi.exceptions import HTTPException
 from sqlalchemy.orm import Session
-from schemas.cuenta_schema import CreateCuentaRequest, UpdateCuentaRequest, VerifyToken, DeleteCuentaRequest
+from schemas.cuenta_schema import (
+    CreateCuentaRequest, 
+    UpdateCuentaRequest, 
+    VerifyToken, 
+    DeleteCuentaRequest, 
+    GetCuetasResponse
+)
 from controllers import cuenta_controller
 from database.finance import get_db
 from controllers import cuenta_controller
@@ -10,7 +17,7 @@ from controllers import cuenta_controller
 router = APIRouter(prefix="/account")
 
 # obtener cuentas MEJORAR LO QUE RETORNA EL GET
-@router.get("")
+@router.get("", response_model=List[GetCuetasResponse], response_model_exclude_none=True)
 def get_cuentas(db: Session = Depends(get_db), user: VerifyToken = Depends(cuenta_controller.verify_token)):
     return cuenta_controller.obtener_cuentas(db, user.user_id)
 

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, HttpUrl, ConfigDict
 from typing import Optional
 from datetime import datetime
 
@@ -28,3 +28,30 @@ class VerifyToken(BaseModel):
 
 class DeleteCuentaRequest(BaseModel):
     cuenta_id: str
+
+class GetTipoCuentaResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    tipo: str
+
+class GetBancoResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    nombre_banco: str
+    url: HttpUrl
+
+class GetCuetasResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    
+    id: str
+    nombre_cuenta: str | None = None
+    saldo: int | None = None
+    limite_credito: int | None = None
+    fecha_facturacion: datetime | None = None
+    fecha_pago: datetime | None = None
+    tipo_cuenta: GetTipoCuentaResponse
+    banco: GetBancoResponse
+
+
+
+    
