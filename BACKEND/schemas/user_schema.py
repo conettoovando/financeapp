@@ -21,8 +21,10 @@ class User(UserBase):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
-
-
+    
 class UserDelete(BaseModel):
     email: EmailStr
     password: str
+
+class VerifyToken(BaseModel):
+    user_id: str

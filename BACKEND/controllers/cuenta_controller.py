@@ -5,41 +5,11 @@ from sqlalchemy.orm import Session, joinedload
 from models.banco import Banco
 from models.cuenta import TipoCuenta, Cuenta
 from models.user import Users
-from schemas.cuenta_schema import CreateCuentaRequest, UpdateCuentaRequest, VerifyToken, DeleteCuentaRequest
+from schemas.cuenta_schema import CreateCuentaRequest, UpdateCuentaRequest, DeleteCuentaRequest
 from sqlalchemy import select
-
-AUTH_PUBLIC_KEY_URL = "http://localhost:8000/auth/public-key"
-ALGORITHM="RS256"
-
-def get_public_key():
-    res = requests.get(AUTH_PUBLIC_KEY_URL)
-    if res.status_code != 200:
-        raise RuntimeError("No se pudo obtener la clave pública")
-    return res.text
 
 def authorization_error():
     return HTTPException(status_code=400, detail="Usuario no autorizado")
-
-public_key = get_public_key()
-
-def verify_token(request: Request) -> VerifyToken:
-    token = request.cookies.get("access_token")
-
-    if not token:
-        raise HTTPException(status_code=401, detail="No autenticado")
-    
-    try:
-        payload = jwt.decode(token, public_key, algorithms=ALGORITHM)
-        user_id = payload.get("sub")
-        if not user_id:
-            raise HTTPException(status_code=401, detail="Token sin 'sub'")
-        
-        return VerifyToken(
-            user_id=user_id
-        )
-    
-    except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Token invalido o expirado")
 
 def obtener_cuentas(db: Session, user: str):
     cuentas = db.execute(
@@ -48,8 +18,20 @@ def obtener_cuentas(db: Session, user: str):
         .filter(Cuenta.user_id == user)
     ).scalars().all()
 
-    # Falta crear el modelo de retorno de los datos unicamente necesarios. 
     return cuentas
+
+def obtener_cuenta(db: Session, user: str, account_id: str):
+    print(f"Toca retornar solo el elemento del id {account_id}")
+    cuenta = db.execute(
+        select(Cuenta)
+        .options(joinedload(Cuenta.banco), joinedload(Cuenta.tipo_cuenta))
+        .filter(
+            Cuenta.user_id == user,
+            Cuenta.id == account_id
+        )
+    ).scalar_one_or_none()
+
+    return cuenta
 
 def crear_cuenta(request: CreateCuentaRequest, db: Session):
     # Validar tipo de cuenta

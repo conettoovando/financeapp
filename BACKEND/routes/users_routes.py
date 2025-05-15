@@ -69,5 +69,5 @@ async def refresh_tokens(request: Request, response: Response = Response()):
     return {"msg": "Token de acceso actualizado"}
 
 @router.get("/me")
-async def me(token: str = Depends(oauth2_scheme)):
-    return user_controller.me(token=token)
+async def me(request: Request):
+    return user_controller.me(request)

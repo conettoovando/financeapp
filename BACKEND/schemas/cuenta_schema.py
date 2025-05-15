@@ -23,9 +23,6 @@ class UpdateCuentaRequest(BaseModel):
     fecha_facturacion: Optional[datetime] = None
     fecha_pago: Optional[datetime] = None
 
-class VerifyToken(BaseModel):
-    user_id: str
-
 class DeleteCuentaRequest(BaseModel):
     cuenta_id: str
 
