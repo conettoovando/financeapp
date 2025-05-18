@@ -50,3 +50,32 @@ class NuevoMovimientoResponse(BaseModel):
             categoria=movimiento.categoria.nombre,
             destinatario=CategoriaResponse.model_validate(movimiento.destinatario) if movimiento.destinatario else None
         )
+    
+class MovimientoModel(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    saldo: int
+    tipo: str
+    monto: int
+    fecha: datetime
+    categoria: str
+    destinatario: Optional[CategoriaResponse]
+
+    @classmethod
+    def from_orm_full(cls, movimiento: Movimiento):
+        return cls(
+            id=movimiento.id,
+            nuevo_saldo=movimiento.cuenta.saldo,
+            tipo=movimiento.tipo_movimiento.tipo,
+            monto=movimiento.monto,
+            fecha=movimiento.fecha,
+            categoria=movimiento.categoria.nombre,
+            destinatario=CategoriaResponse.model_validate(movimiento.destinatario) if movimiento.destinatario else None
+        )
+
+class ObtenerMovimientos(BaseModel):
+    count: int
+    next: HttpUrl | None
+    previous: HttpUrl | None
+    results: list[MovimientoModel]

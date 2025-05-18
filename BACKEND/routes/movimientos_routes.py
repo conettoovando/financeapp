@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 from typing import List, Optional
 
 from fastapi.exceptions import HTTPException
 from sqlalchemy.orm import Session
 from schemas.movimientos_schema import (
     CreateNewMovimiento,
-    NuevoMovimientoResponse
+    NuevoMovimientoResponse,
+    ObtenerMovimientos
 )
 from schemas.user_schema import VerifyToken
 from database.finance import get_db
@@ -14,6 +15,18 @@ from controllers import user_controller
 
 router = APIRouter()
 
+@router.get("/")#, response_model=ObtenerMovimientos)
+async def obtener_movimientos(
+    db: Session = Depends(get_db),
+    user: VerifyToken = Depends(user_controller.verify_token),
+    limit: int = 10,
+    offset: int = 0,
+    orden: str = "desc",
+    request: Request = None
+):
+    base_url = str(request.url.replace(query=None))
+    return movimiento_controller.obtener_movimientos(db, user.user_id, limit, offset, orden, base_url)
+
 # Crear nuevos movimientos de una cuenta
 @router.post("/", response_model=NuevoMovimientoResponse)
 async def crear_movimiento(
@@ -21,4 +34,5 @@ async def crear_movimiento(
     db: Session = Depends(get_db),
     user: VerifyToken = Depends(user_controller.verify_token)
 ):
-    return movimiento_controller.crear_movimiento(db, user, request)
+    
+    return movimiento_controller.crear_movimiento(db, user.user_id, request)
