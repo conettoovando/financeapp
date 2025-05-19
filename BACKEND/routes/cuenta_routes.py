@@ -19,9 +19,9 @@ router = APIRouter()
 # obtener cuentas MEJORAR LO QUE RETORNA EL GET
 @router.get("/{cuenta_id}", response_model=GetCuetasResponse)
 def obtener_cuenta(
+        cuenta_id: str,
         db: Session = Depends(get_db),
-        user: VerifyToken = Depends(user_controller.verify_token),
-        cuenta_id: str = None
+        user: VerifyToken = Depends(user_controller.verify_token)
     ):
     print("Entre al endpoind de un solo dato")
     return cuenta_controller.obtener_cuenta(db, user.user_id, cuenta_id)

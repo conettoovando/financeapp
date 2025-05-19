@@ -107,7 +107,7 @@ def obtener_movimientos(db: Session, user: str, limit: int, offset: int, orden: 
     next_offset = offset + limit
     prev_offset = offset - limit if offset - limit >= 0 else None
 
-    next_url = f"{base_url}?{urlencode({'offset': next_offset, 'limit': limit, 'orden': orden})}" if next_offset < total else None
+    next_url = f"{base_url}?{urlencode({'offset': next_offset, 'limit': limit, 'orden': orden})}" if (total is not None and next_offset < total) else None
     prev_url = f"{base_url}?{urlencode({'offset': prev_offset, 'limit': limit, 'orden': orden})}" if prev_offset is not None else None
 
     return {
@@ -116,3 +116,4 @@ def obtener_movimientos(db: Session, user: str, limit: int, offset: int, orden: 
         "previous": prev_url,
         "results": [MovimientoModel.from_orm_full(m) for m in movimientos]
     }
+

@@ -1,3 +1,4 @@
+# type: ignore
 from pydantic import BaseModel, HttpUrl, ConfigDict
 from typing import Optional
 from datetime import datetime
@@ -55,7 +56,6 @@ class MovimientoModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: str
-    saldo: int
     tipo: str
     monto: int
     fecha: datetime
@@ -66,13 +66,12 @@ class MovimientoModel(BaseModel):
     def from_orm_full(cls, movimiento: Movimiento):
         return cls(
             id=movimiento.id,
-            nuevo_saldo=movimiento.cuenta.saldo,
             tipo=movimiento.tipo_movimiento.tipo,
             monto=movimiento.monto,
             fecha=movimiento.fecha,
             categoria=movimiento.categoria.nombre,
             destinatario=CategoriaResponse.model_validate(movimiento.destinatario) if movimiento.destinatario else None
-        )
+        ) 
 
 class ObtenerMovimientos(BaseModel):
     count: int

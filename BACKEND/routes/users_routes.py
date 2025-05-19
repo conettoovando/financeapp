@@ -71,3 +71,11 @@ async def refresh_tokens(request: Request, response: Response = Response()):
 @router.get("/me")
 async def me(request: Request):
     return user_controller.me(request)
+
+@router.put("/me")
+async def actualizar_usuario():
+    pass
+
+@router.delete("/me")
+async def eliminar_usuario():
+    pass

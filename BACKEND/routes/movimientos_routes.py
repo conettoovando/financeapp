@@ -15,14 +15,14 @@ from controllers import user_controller
 
 router = APIRouter()
 
-@router.get("/")#, response_model=ObtenerMovimientos)
+@router.get("/", response_model=ObtenerMovimientos)
 async def obtener_movimientos(
+    request: Request,
     db: Session = Depends(get_db),
     user: VerifyToken = Depends(user_controller.verify_token),
     limit: int = 10,
     offset: int = 0,
-    orden: str = "desc",
-    request: Request = None
+    orden: str = "desc"
 ):
     base_url = str(request.url.replace(query=None))
     return movimiento_controller.obtener_movimientos(db, user.user_id, limit, offset, orden, base_url)
@@ -36,3 +36,16 @@ async def crear_movimiento(
 ):
     
     return movimiento_controller.crear_movimiento(db, user.user_id, request)
+
+@router.get("/{id}")
+async def obtener_movimiento():
+    pass
+
+@router.put("/{id}")
+async def actualizar_movimiento():
+    pass
+
+@router.delete("/{id}")
+async def eliminar_movimiento():
+    pass
+
