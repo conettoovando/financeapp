@@ -78,3 +78,10 @@ class ObtenerMovimientos(BaseModel):
     next: HttpUrl | None
     previous: HttpUrl | None
     results: list[MovimientoModel]
+
+class ActualizarMovimiento(BaseModel):
+    cuenta_id: Optional[str] = None
+    monto: Optional[int] = None
+    fecha: Optional[datetime] = None
+    categoria_id: Optional[str] = None
+    destinatario_id: Optional[str] = None

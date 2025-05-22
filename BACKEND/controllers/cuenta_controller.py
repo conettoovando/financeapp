@@ -72,7 +72,7 @@ def actualizar_cuenta(request: UpdateCuentaRequest, db: Session, user_id: str):
         raise HTTPException(status_code=400, detail="Cuenta no encontrada")
 
     
-    if cuenta.user_id != user_id:
+    if str(cuenta.user_id) != user_id:
         raise authorization_error()
     
     # Actualizar los campos de la cuenta

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, CHAR, text
+from sqlalchemy import Column, String, CHAR, text, ForeignKey
 from sqlalchemy.orm import relationship
 from database.finance import Base
 
@@ -7,6 +7,8 @@ class Categoria(Base):
 
     id = Column(CHAR(36), primary_key=True, server_default=text("uuid_generate_v4()"))
     nombre = Column(String(30), nullable=False)
+    usuario_id = Column(CHAR(36), ForeignKey("Users.id", ondelete="CASCADE"), nullable=True)
 
+    usuario = relationship("Users", back_populates="categorias")
     movimientos = relationship("Movimiento", back_populates="categoria")
 

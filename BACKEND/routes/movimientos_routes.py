@@ -6,7 +6,9 @@ from sqlalchemy.orm import Session
 from schemas.movimientos_schema import (
     CreateNewMovimiento,
     NuevoMovimientoResponse,
-    ObtenerMovimientos
+    ObtenerMovimientos,
+    MovimientoModel,
+    ActualizarMovimiento
 )
 from schemas.user_schema import VerifyToken
 from database.finance import get_db
@@ -27,6 +29,14 @@ async def obtener_movimientos(
     base_url = str(request.url.replace(query=None))
     return movimiento_controller.obtener_movimientos(db, user.user_id, limit, offset, orden, base_url)
 
+@router.get("/{mov_id}", response_model=MovimientoModel)
+async def obtener_movimiento(
+    mov_id: str,
+    db: Session = Depends(get_db),
+    user: VerifyToken = Depends(user_controller.verify_token),
+):
+    return movimiento_controller.obtener_movimiento(db, user.user_id, mov_id)
+
 # Crear nuevos movimientos de una cuenta
 @router.post("/", response_model=NuevoMovimientoResponse)
 async def crear_movimiento(
@@ -37,15 +47,23 @@ async def crear_movimiento(
     
     return movimiento_controller.crear_movimiento(db, user.user_id, request)
 
-@router.get("/{id}")
-async def obtener_movimiento():
-    pass
+# Crear metodo para actualizar los movimientos
+@router.patch("/{id}")
+async def actualizar_movimiento(
+    id:str,
+    new_movimiento: ActualizarMovimiento,
+    db: Session = Depends(get_db),
+    user: VerifyToken = Depends(user_controller.verify_token)
+):
+    return movimiento_controller.actualizar_movimiento(db, user.user_id, id, new_movimiento)
 
-@router.put("/{id}")
-async def actualizar_movimiento():
-    pass
-
+# Crear metodo para eliminar los movimientos
 @router.delete("/{id}")
-async def eliminar_movimiento():
-    pass
+async def eliminar_movimiento(
+    id: str,
+    db: Session = Depends(get_db),
+    user: VerifyToken = Depends(user_controller.verify_token)
+):
+    return movimiento_controller.eliminar_movimiento(db, user.user_id, id)
+    
 

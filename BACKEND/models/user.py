@@ -12,3 +12,4 @@ class Users(Base):
     destinatarios = relationship("Destinatario", back_populates="usuario", cascade="all, delete")
     cuentas = relationship("Cuenta", back_populates="usuario", cascade="all, delete")
     movimientos = relationship("Movimiento", back_populates="usuario", cascade="all, delete")
+    categorias = relationship("Categoria", back_populates="usuario", cascade="all, delete")

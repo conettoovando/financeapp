@@ -12,7 +12,7 @@ from schemas.movimientos_schema import (
     CreateNewMovimiento,
     MovimientoModel,
     NuevoMovimientoResponse,
-    ObtenerMovimientos
+    ActualizarMovimiento
 )
 # UTILS
 from datetime import datetime, timezone
@@ -116,4 +116,47 @@ def obtener_movimientos(db: Session, user: str, limit: int, offset: int, orden: 
         "previous": prev_url,
         "results": [MovimientoModel.from_orm_full(m) for m in movimientos]
     }
+
+def obtener_movimiento(db: Session, user_id: str, mov_id):
+    movimiento = db.execute(
+        select(Movimiento)
+        .filter((Movimiento.id == mov_id) & (Movimiento.usuario_id == user_id))
+        .options(
+            joinedload(Movimiento.categoria),
+            joinedload(Movimiento.tipo_movimiento),
+            joinedload(Movimiento.destinatario),
+            joinedload(Movimiento.cuenta)
+        )
+    ).scalar_one_or_none()
+
+    if not movimiento:
+        raise HTTPException(status_code=404, detail="Movimiento no registrado")
+    
+    return MovimientoModel.from_orm_full(movimiento)
+
+def actualizar_movimiento(db: Session, user_id: str, mov_id: str, new_movimiento: ActualizarMovimiento):
+    movimiento = db.get(Movimiento, mov_id)
+    if movimiento is None or str(movimiento.usuario_id) != str(user_id):
+        raise HTTPException(status_code=404, detail="Movimiento no encontrado")
+    
+    for campo, valor in new_movimiento.model_dump(exclude_unset=True).items():
+        setattr(movimiento, campo, valor)
+
+    db.commit()
+    db.refresh(movimiento)
+
+    return movimiento
+
+def eliminar_movimiento(db: Session, user_id: str, mov_id: str):
+    movimiento = db.get(Movimiento, mov_id)
+
+    if movimiento is None or str(movimiento.usuario_id) != user_id:
+        raise HTTPException(status_code=404, detail="Movimiento no encontrado")
+
+    db.delete(movimiento)
+    db.commit()
+
+    return {"message": "Movimiento eliminado correctamente"}
+
+
 
