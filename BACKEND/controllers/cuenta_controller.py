@@ -71,11 +71,9 @@ def actualizar_cuenta(request: UpdateCuentaRequest, db: Session, user_id: str):
     if not cuenta:
         raise HTTPException(status_code=400, detail="Cuenta no encontrada")
 
-    
     if str(cuenta.user_id) != user_id:
         raise authorization_error()
     
-    # Actualizar los campos de la cuenta
     update_data = request.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(cuenta, key, value)

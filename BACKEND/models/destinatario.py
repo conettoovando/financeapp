@@ -1,11 +1,11 @@
-from sqlalchemy import Column, String, CHAR, ForeignKey
+from sqlalchemy import Column, String, CHAR, ForeignKey, text
 from sqlalchemy.orm import relationship
 from database.finance import Base
 
 class Destinatario(Base):
     __tablename__ = "Destinatario"
 
-    id = Column(CHAR(36), primary_key=True, server_default=("uuid_generate_v4()"))
+    id = Column(CHAR(36), primary_key=True, server_default=text("uuid_generate_v4()"))
     usuario_id = Column(CHAR(36), ForeignKey("Users.id", ondelete="CASCADE"), nullable=False)
     nombre = Column(String(50), nullable=False)
 
