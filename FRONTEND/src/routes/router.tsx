@@ -7,7 +7,7 @@ import Login from "../pages/Login";
 import { AuthProvider } from "../context/AuthProvider";
 import ProtectedRoute from "./ProtectedRoute";
 import PublicRoute from "./PublicRoute";
-import Dashboard from "../pages/dashboard";
+import Dashboard from "../pages/Dashboard/Dashboard";
 
 const router = createBrowserRouter([
   // 🔓 Rutas públicas
