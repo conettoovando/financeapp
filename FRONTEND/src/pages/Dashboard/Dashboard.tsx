@@ -43,7 +43,6 @@ export default function Dashboard() {
   return (
     <div className="max-w-5xl mx-auto">
       <div className="p-4 mx-auto">
-        <FloatingMenu />
         <div className="flex justify-center">
           <div className="mt-5 grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 gap-x-10">
             {cuentasVisibles.map((cuenta) => (
@@ -78,6 +77,7 @@ export default function Dashboard() {
             )}
           </div>
         </div>
+        <FloatingMenu />
       </div>
     </div>
   );
