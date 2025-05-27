@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends, Response, Request
+from fastapi import APIRouter, Depends, Response, Request, status
 from fastapi.security import OAuth2PasswordBearer
 
 from fastapi.exceptions import HTTPException
 from sqlalchemy.orm import Session
 from controllers import user_controller
-from schemas.user_schema import UserCreate, UserLogin
+from schemas.user_schema import UserCreate, UserLogin, VerifyToken
 from database.finance import get_db
 
 router = APIRouter(prefix="/auth", tags=["users"])
@@ -15,38 +15,8 @@ async def create_account(account: UserCreate, db: Session = Depends(get_db)):
     return user_controller.create_user(db, account)
 
 @router.post("/login")
-async def login_account(account: UserLogin, db: Session = Depends(get_db), response: Response = Response()):
-    tokens = user_controller.login_user(db, account)
-
-    if not tokens:
-        raise HTTPException(status_code=401, detail="Credenciales inválidas")
-    
-    response.set_cookie(
-        key="refresh_token",
-        value=tokens["refresh_token"],
-        httponly=True,
-        secure=True,
-        samesite="none",
-        max_age=60 * 60 * 24 * 7
-    )
-
-    response.set_cookie(
-        key="access_token",
-        value=tokens["access_token"],
-        httponly=True,
-        secure=True,
-        samesite="none"
-    )
-
-    response.set_cookie(
-        key="token_type",
-        value=tokens["token_type"],
-        httponly=False,
-        secure=True,
-        samesite="none"
-    )
-
-    return {"msg": "Acceso consedido con exito"}
+async def login_account(db: Session = Depends(get_db), user: VerifyToken = Depends(user_controller.verify_token)):
+    return user_controller.login_user(db, user.user_id)
 
 @router.post("/refresh")
 async def refresh_tokens(request: Request, response: Response = Response()):
@@ -79,3 +49,20 @@ async def actualizar_usuario():
 @router.delete("/me")
 async def eliminar_usuario():
     pass
+
+@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+async def cerrar_session(response: Response):
+    cookie_settings = {
+        "httponly": True,
+        "secure": True,
+        "samesite": "none",
+        "path": "/",  # opcional si lo usaste en set_cookie
+    }
+
+    response.delete_cookie("access_token", **cookie_settings)
+    response.delete_cookie("refresh_token", **cookie_settings)
+    
+    # token_type era httponly=False, así que debe ir separado
+    response.delete_cookie("token_type", secure=True, samesite="none", path="/")
+
+    return {"message": "Sesión cerrada"}

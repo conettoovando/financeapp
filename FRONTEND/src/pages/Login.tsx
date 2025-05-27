@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 
 type formData = {
   email: string;
@@ -30,7 +30,7 @@ export default function Login() {
       } else {
         alert("Sesión iniciada correctamente");
       }
-    } catch (error) {
+    } catch {
       alert("Ocurrió un error inesperado");
     } finally {
       reset();

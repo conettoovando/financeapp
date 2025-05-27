@@ -23,7 +23,6 @@ def obtener_cuenta(
         db: Session = Depends(get_db),
         user: VerifyToken = Depends(user_controller.verify_token)
     ):
-    print("Entre al endpoind de un solo dato")
     return cuenta_controller.obtener_cuenta(db, user.user_id, cuenta_id)
 
 @router.get("", response_model=List[GetCuetasResponse], response_model_exclude_none=True)
@@ -31,7 +30,6 @@ def get_cuentas(
         db: Session = Depends(get_db),
         user: VerifyToken = Depends(user_controller.verify_token)
     ):
-    print("Entre al endpoind de multiple datos")
     return cuenta_controller.obtener_cuentas(db, user.user_id)
 
 # Ruta para crear una nueva cuenta de banco.
