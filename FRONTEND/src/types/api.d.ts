@@ -10,3 +10,26 @@ export interface Cuenta {
     url: string;
   };
 }
+
+export interface Movimientos {
+  count: number;
+  next: string;
+  previous: string;
+  results: Movimiento[];
+}
+
+export interface Movimiento {
+  id: string;
+  tipo: string;
+  monto: number;
+  fecha: Date;
+  categoria: string;
+  destinatario: {
+    nombre: string
+  }
+}
+
+export interface GastosCategoria {
+  categoria: string;
+  total: number
+}

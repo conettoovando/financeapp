@@ -56,7 +56,7 @@ export default function PrivateLayout({ children }: SidebarProps) {
   };
 
   return (
-    <>
+    <div className="max-h-screen overflow-hidden">
       {/* Botón para abrir/cerrar el sidebar en pantallas pequeñas */}
       <button
         data-drawer-target="sidebar-multi-level-sidebar"
@@ -272,10 +272,10 @@ export default function PrivateLayout({ children }: SidebarProps) {
       </aside>
 
       {/* Contenido principal del dashboard */}
-      <div className="p-4 sm:ml-64">
+      <div className="p-4 sm:ml-64 h-screen">
         {/* Aquí es donde se renderizará el `children` */}
         <Outlet />
       </div>
-    </>
+    </div>
   );
 }
