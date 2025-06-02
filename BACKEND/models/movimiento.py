@@ -6,7 +6,7 @@ from database.finance import Base
 class Movimiento(Base):
     __tablename__ = "Movimiento"
 
-    id = Column(CHAR(36), primary_key=True, server_default=text("uuid_generate_v4()"))
+    id = Column(CHAR(36), primary_key=True, server_default=text("gen_random_uuid()"))
     cuenta_id = Column(CHAR(36), ForeignKey("Cuenta.id", ondelete="CASCADE"), nullable=False)
     usuario_id = Column(CHAR(36), ForeignKey("Users.id", ondelete="CASCADE"), nullable=False)
     TipoMovimiento_id = Column(CHAR(36), ForeignKey("TipoMovimiento.id", ondelete="RESTRICT"), nullable=False)
@@ -24,7 +24,7 @@ class Movimiento(Base):
 class TipoMovimiento(Base):
     __tablename__ = "TipoMovimiento"
 
-    id = Column(CHAR(36), primary_key=True, server_default=("uuid_generate_v4()"))
+    id = Column(CHAR(36), primary_key=True, server_default=("gen_random_uuid()"))
     tipo = Column(String(30), nullable=False)
 
     movimientos = relationship("Movimiento", back_populates="tipo_movimiento")

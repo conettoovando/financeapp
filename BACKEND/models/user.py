@@ -5,7 +5,7 @@ from database.finance import Base
 class Users(Base):
     __tablename__ = "Users"
 
-    id = Column(CHAR(36), primary_key=True, index=True, server_default=text("uuid_generate_v4()"))
+    id = Column(CHAR(36), primary_key=True, index=True, server_default=text("gen_random_uuid()"))
     created_at = Column(TIMESTAMP, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 

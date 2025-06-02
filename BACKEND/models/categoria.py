@@ -5,7 +5,7 @@ from database.finance import Base
 class Categoria(Base):
     __tablename__ = "Categoria"
 
-    id = Column(CHAR(36), primary_key=True, server_default=text("uuid_generate_v4()"))
+    id = Column(CHAR(36), primary_key=True, server_default=text("gen_random_uuid()"))
     nombre = Column(String(30), nullable=False)
     usuario_id = Column(CHAR(36), ForeignKey("Users.id", ondelete="CASCADE"), nullable=True)
 

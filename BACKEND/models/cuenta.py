@@ -5,7 +5,7 @@ from database.finance import Base
 class Cuenta(Base):
     __tablename__ = "Cuenta"
 
-    id = Column(CHAR(36), primary_key=True, server_default=text("uuid_generate_v4()"))
+    id = Column(CHAR(36), primary_key=True, server_default=text("gen_random_uuid()"))
     nombre_cuenta = Column(String(30))
     tipo_cuenta_id = Column(CHAR(36), ForeignKey("TipoCuenta.id", ondelete="RESTRICT"), nullable=False)
     saldo = Column(Integer, default=0)
@@ -25,7 +25,7 @@ class Cuenta(Base):
 class TipoCuenta(Base):
     __tablename__ = "TipoCuenta"
 
-    id = Column(CHAR(36), primary_key=True, server_default=text("uuid_generate_v4()"))
+    id = Column(CHAR(36), primary_key=True, server_default=text("gen_random_uuid()"))
     tipo = Column(String(30), nullable=False)
 
     cuentas = relationship("Cuenta", back_populates="tipo_cuenta")

@@ -5,7 +5,7 @@ from database.finance import Base
 class Banco(Base):
     __tablename__ = "Banco"
 
-    id = Column(CHAR(36), primary_key=True, server_default=text("uuid_generate_v4()"))
+    id = Column(CHAR(36), primary_key=True, server_default=text("gen_random_uuid()"))
     nombre_banco = Column(String(100), nullable=False)
     url = Column(String(150))
 
