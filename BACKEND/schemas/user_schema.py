@@ -28,3 +28,6 @@ class UserDelete(BaseModel):
 
 class VerifyToken(BaseModel):
     user_id: str
+
+class UserLoginBody(BaseModel):
+    user_id: str

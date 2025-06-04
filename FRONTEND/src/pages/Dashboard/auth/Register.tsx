@@ -1,13 +1,14 @@
 import { useForm } from "react-hook-form";
-import { useAuth } from "../context/useAuth";
+import { useAuth } from "../../../context/useAuth";
 
 type formData = {
   email: string;
   password: string;
+  confirmpassword: string;
 };
 
 export default function Login() {
-  const { login } = useAuth();
+  const { registerAcc } = useAuth();
 
   const {
     register,
@@ -18,20 +19,11 @@ export default function Login() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      const response = await login({
+      await registerAcc({
         email: data.email,
         password: data.password,
+        confirmpassword: data.confirmpassword,
       });
-
-      if (response && "error" in response) {
-        alert(
-          `Error ${response.status}: ${response.error || "Error desconocido"}`
-        );
-      } else {
-        alert("Sesión iniciada correctamente");
-      }
-    } catch {
-      alert("Ocurrió un error inesperado");
     } finally {
       reset();
     }
@@ -80,7 +72,7 @@ export default function Login() {
 
           <div className="flex flex-col gap-2">
             <label
-              htmlFor="email"
+              htmlFor="password"
               className="text-sm text-slate-700 font-semibold"
             >
               Contraseña{" "}
@@ -101,28 +93,30 @@ export default function Login() {
               </p>
             )}
           </div>
-        </div>
 
-        <div className="flex gap-3 items-center w-full">
-          <input
-            type="checkbox"
-            id="terms"
-            className="accent-stone-800 cursor-pointer rounded-sm w-5 h-5"
-          />
-          <label
-            htmlFor="terms"
-            className="text-sm text-slate-700 font-semibold cursor-pointer leading-5"
-          >
-            He leído y acepto los{" "}
-            <a href="#" className="text-blue-700 underline capitalize">
-              Términos & conficiones
-            </a>{" "}
-            y la
-            <a href="#" className="text-blue-700 underline">
-              {" "}
-              política de privacidad.
-            </a>
-          </label>
+          <div className="flex flex-col gap-2">
+            <label
+              htmlFor="confirmpassword"
+              className="text-sm text-slate-700 font-semibold"
+            >
+              Contraseña{" "}
+            </label>
+
+            <input
+              type="password"
+              id="confirmpassword"
+              className={`border rounded-sm px-2 py-3 text-sm outline-none font-medium text-slate-600`}
+              placeholder="******"
+              {...register("confirmpassword", {
+                required: "Se requiere una contraseña",
+              })}
+            />
+            {errors.confirmpassword && (
+              <p className="text-red-500 font-medium text-sn w-full">
+                {errors.confirmpassword.message}
+              </p>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-col gap-3 w-full">
@@ -133,6 +127,9 @@ export default function Login() {
             Ingresar
           </button>
           <button
+            onClick={() => {
+              window.history.back();
+            }}
             type="button"
             className="underline font-medium cursor-pointer"
           >

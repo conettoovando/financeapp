@@ -21,7 +21,6 @@ def obtener_cuentas(db: Session, user: str):
     return cuentas
 
 def obtener_cuenta(db: Session, user: str, account_id: str):
-    print(f"Toca retornar solo el elemento del id {account_id}")
     cuenta = db.execute(
         select(Cuenta)
         .options(joinedload(Cuenta.banco), joinedload(Cuenta.tipo_cuenta))
@@ -33,7 +32,7 @@ def obtener_cuenta(db: Session, user: str, account_id: str):
 
     return cuenta
 
-def crear_cuenta(request: CreateCuentaRequest, db: Session):
+def crear_cuenta(request: CreateCuentaRequest, db: Session, user: str):
     # Validar tipo de cuenta
     tipo_cuenta = db.execute(select(TipoCuenta).filter(TipoCuenta.id == request.tipo_cuenta_id)).scalar_one_or_none()
     if not tipo_cuenta:
@@ -44,7 +43,7 @@ def crear_cuenta(request: CreateCuentaRequest, db: Session):
     if not banco:
         raise HTTPException(status_code=400, detail="Banco no valido")
 
-    usuario = db.execute(select(Users).filter(Users.id == request.user_id)).scalar_one_or_none()
+    usuario = db.execute(select(Users).filter(Users.id == user)).scalar_one_or_none()
     if not usuario:
         raise HTTPException(status_code=400, detail="Usuario no encontrado")
 

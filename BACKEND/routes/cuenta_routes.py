@@ -34,11 +34,8 @@ def get_cuentas(
 
 # Ruta para crear una nueva cuenta de banco.
 @router.post("")
-def crear_cuenta( request: CreateCuentaRequest, db: Session = Depends(get_db), user: VerifyToken = Depends(user_controller.verify_token)):
-    if request.user_id != user.user_id:
-        raise cuenta_controller.authorization_error()
-    
-    cuenta = cuenta_controller.crear_cuenta(request, db)
+def crear_cuenta( request: CreateCuentaRequest, db: Session = Depends(get_db), user: VerifyToken = Depends(user_controller.verify_token)):    
+    cuenta = cuenta_controller.crear_cuenta(request, db, user.user_id)
     return {"message": "Cuenta creada correctamente", "data": cuenta}
 
 # Ruta para actualizar la información de la cuenta.

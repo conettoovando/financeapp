@@ -24,10 +24,15 @@ async def obtener_movimientos(
     user: VerifyToken = Depends(user_controller.verify_token),
     limit: int = 10,
     offset: int = 0,
-    orden: str = "desc"
+    orden: str = "desc",
+    cuenta_id: Optional[str] = None  # 🆕
 ):
     base_url = str(request.url.replace(query=None))
-    return movimiento_controller.obtener_movimientos(db, user.user_id, limit, offset, orden, base_url)
+    return movimiento_controller.obtener_movimientos(
+        db, user.user_id, limit, offset, orden, base_url, cuenta_id
+    )
+
+
 
 @router.get("/{mov_id}", response_model=MovimientoModel)
 async def obtener_movimiento(

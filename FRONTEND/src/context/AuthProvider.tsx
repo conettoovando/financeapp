@@ -2,7 +2,12 @@ import { useEffect, useState, type ReactNode } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router";
 import { AuthContext } from "./AuthContext";
-import type { User, MeResponse, LoginResponse } from "../types";
+import type {
+  User,
+  MeResponse,
+  LoginResponse,
+  RegisterResponse,
+} from "../types";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -59,9 +64,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     password: string;
   }): Promise<LoginResponse> => {
     try {
-      await axios.post("http://localhost:8000/login", credentials, {
-        withCredentials: true,
-      });
+      const response = await axios.post(
+        "http://localhost:8000/login",
+        credentials,
+        {
+          withCredentials: true,
+        }
+      );
+      if (response.status === 200) {
+        await axios.post(
+          "http://localhost:8001/auth/login",
+          { user_id: response.data.id },
+          { withCredentials: true }
+        );
+      }
       await fetchUser();
       navigate("/dashboard");
     } catch (error) {
@@ -70,6 +86,51 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           success: false,
           error: error.response?.data.detail,
           status: error.response?.status,
+        };
+      }
+      return {
+        success: false,
+        error: "Error desconocido",
+      };
+    }
+  };
+
+  const registerAcc = async (credentials: {
+    email: string;
+    password: string;
+    confirmpassword: string;
+  }): Promise<RegisterResponse> => {
+    if (credentials.password !== credentials.confirmpassword) {
+      return {
+        success: false,
+        error: "Las contraseñas no coinciden",
+      };
+    }
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/register",
+        credentials,
+        {
+          withCredentials: true,
+        }
+      );
+      if (response.status === 201) {
+        navigate("/login");
+        return {
+          success: true,
+          error: null,
+        };
+      } else {
+        return {
+          success: false,
+          error: "Error en el registro",
+        };
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return {
+          success: false,
+          error: error.response?.data.detail || "Error en el registro",
         };
       }
       return {
@@ -104,6 +165,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         isAuthenticated: !!user,
         isLoading,
         login,
+        registerAcc,
         logout,
         setUser,
         fetchUser,

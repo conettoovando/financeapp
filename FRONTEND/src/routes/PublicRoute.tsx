@@ -7,7 +7,7 @@ const PublicRoute = () => {
 
   if (isLoading) return <div>Cargando...</div>;
 
-  return isAuthenticated ? <Navigate to="/dashboard" /> : <Outlet />;
+  return isAuthenticated ? <Navigate to="/tabs/dashboard" /> : <Outlet />;
 };
 
 export default PublicRoute;

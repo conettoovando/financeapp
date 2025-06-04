@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import HTTPException
 # SQLALCHEMY
 from sqlalchemy.orm import Session, joinedload
@@ -83,19 +84,45 @@ def crear_movimiento(db: Session, user: str, request: CreateNewMovimiento):
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error al crear el movimiento: {str(e)}")
 
-def obtener_movimientos(db: Session, user: str, limit: int, offset: int, orden: str, base_url: str):
+from fastapi import HTTPException, status
+
+def obtener_movimientos(
+    db: Session,
+    user: str,
+    limit: int,
+    offset: int,
+    orden: str,
+    base_url: str,
+    cuenta_id: Optional[str] = None
+):
+    print(f"Movimiento de la cuenta {cuenta_id}")
+    query = select(Movimiento).filter(Movimiento.usuario_id == user)
+
+    if cuenta_id is not None:
+        # 🛡️ Verificar que la cuenta pertenezca al usuario
+        cuenta = db.execute(
+            select(Cuenta).filter(Cuenta.id == cuenta_id, Cuenta.user_id == user)
+        ).scalar_one_or_none()
+
+        if cuenta is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="La cuenta no existe o no pertenece al usuario"
+            )
+
+        query = query.filter(Movimiento.cuenta_id == cuenta_id)
+
     total = db.execute(
-        select(func.count()).select_from(Movimiento).filter(Movimiento.usuario_id == user)
+        select(func.count()).select_from(query.subquery())
     ).scalar()
 
     orden_columna = Movimiento.fecha.desc() if orden == "desc" else Movimiento.fecha.asc()
 
     movimientos = db.execute(
-        select(Movimiento)
+        query
         .order_by(orden_columna)
         .limit(limit)
         .offset(offset)
-        .filter(Movimiento.usuario_id == user)
         .options(
             joinedload(Movimiento.cuenta),
             joinedload(Movimiento.tipo_movimiento),
@@ -107,15 +134,28 @@ def obtener_movimientos(db: Session, user: str, limit: int, offset: int, orden: 
     next_offset = offset + limit
     prev_offset = offset - limit if offset - limit >= 0 else None
 
-    next_url = f"{base_url}?{urlencode({'offset': next_offset, 'limit': limit, 'orden': orden})}" if (total is not None and next_offset < total) else None
-    prev_url = f"{base_url}?{urlencode({'offset': prev_offset, 'limit': limit, 'orden': orden})}" if prev_offset is not None else None
+    query_params = {"offset": offset, "limit": limit, "orden": orden}
+    if cuenta_id is not None:
+        query_params["cuenta_id"] = cuenta_id
+
+    next_url = (
+        f"{base_url}?{urlencode({**query_params, 'offset': next_offset})}"
+        if total and next_offset < total else None
+    )
+
+    prev_url = (
+        f"{base_url}?{urlencode({**query_params, 'offset': prev_offset})}"
+        if prev_offset is not None else None
+    )
 
     return {
         "count": total,
         "next": next_url,
         "previous": prev_url,
-        "results": [MovimientoModel.from_orm_full(m) for m in movimientos]
+        "results": [MovimientoModel.from_orm_full(m) for m in movimientos],
     }
+
+
 
 def obtener_movimiento(db: Session, user_id: str, mov_id):
     movimiento = db.execute(

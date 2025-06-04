@@ -4,7 +4,7 @@ from fastapi.security import OAuth2PasswordBearer
 from fastapi.exceptions import HTTPException
 from sqlalchemy.orm import Session
 from controllers import user_controller
-from schemas.user_schema import UserCreate, UserLogin, VerifyToken
+from schemas.user_schema import UserCreate, UserLogin, UserLoginBody, VerifyToken
 from database.finance import get_db
 
 router = APIRouter(prefix="/auth", tags=["users"])
@@ -15,8 +15,9 @@ async def create_account(account: UserCreate, db: Session = Depends(get_db)):
     return user_controller.create_user(db, account)
 
 @router.post("/login")
-async def login_account(db: Session = Depends(get_db), user: VerifyToken = Depends(user_controller.verify_token)):
-    return user_controller.login_user(db, user.user_id)
+async def login_account(user_id: UserLoginBody, db: Session = Depends(get_db)):
+    print("user_id", user_id.user_id)
+    return user_controller.login_user(db, user_id.user_id)
 
 @router.post("/refresh")
 async def refresh_tokens(request: Request, response: Response = Response()):

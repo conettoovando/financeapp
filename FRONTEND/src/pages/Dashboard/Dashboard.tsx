@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import type { Cuenta, Movimientos, GastosCategoria } from "../../types";
-import FloatingMenu from "./FloatingMenu";
-import { v4 as uuidv4 } from "uuid";
-import { Link } from "react-router";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react"; // ícono opcional
+import { Link, useNavigate } from "react-router";
+import Container from "../../components/Container";
+import { getMovimientos } from "../../services/movimientosService";
+import MovimientosComponent from "../../components/Movimientos";
 
 export default function Dashboard() {
   const [cuentas, setCuentas] = useState<Cuenta[]>([]);
   const [movimientos, setMovimientos] = useState<Movimientos>();
   const [gastosCategoria, setGastosCategoria] = useState<GastosCategoria[]>([]);
+  const navigate = useNavigate();
 
   async function getCuentas() {
     const response = await axios.get<Cuenta[]>(
@@ -24,16 +25,6 @@ export default function Dashboard() {
     }
   }
 
-  async function getMovimientos(url = "http://localhost:8001/api/movimientos") {
-    const response = await axios.get<Movimientos>(url, {
-      withCredentials: true,
-    });
-
-    if (response.status === 200) {
-      setMovimientos(response.data);
-    }
-  }
-
   async function getGastosPorCategoria() {
     const response = await axios.get<GastosCategoria[]>(
       "http://localhost:8001/api/estadisticas/gastos-por-categoria",
@@ -41,36 +32,26 @@ export default function Dashboard() {
     );
 
     if (response.status === 200) {
-      console.log(response.data);
       setGastosCategoria(response.data);
     }
   }
 
   useEffect(() => {
+    const fetchData = async () => {
+      const data = await getMovimientos();
+      setMovimientos(data);
+    };
     getCuentas();
-    getMovimientos();
     getGastosPorCategoria();
+    fetchData();
   }, []);
 
   function addCuenta() {
-    const nuevaCuenta: Cuenta = {
-      nombre_cuenta: "cuenta por boton",
-      id: uuidv4(),
-      saldo: 0,
-      tipo_cuenta: {
-        tipo: "",
-      },
-      banco: {
-        nombre_banco: "",
-        url: "",
-      },
-    };
-
-    setCuentas([...cuentas, nuevaCuenta]);
+    return navigate("/tabs/cuenta/add-cuenta");
   }
 
   return (
-    <div className="p-4 mx-auto h-[98vh]">
+    <Container>
       <div className="flex h-full">
         {/* Contenido central */}
         <main className="flex-1 p-6 space-y-6">
@@ -79,74 +60,10 @@ export default function Dashboard() {
           </button>
 
           {/* Tabla de movimientos */}
-          <div className="flex justify-between m-0  align-bottom">
-            <h2 className="text-gray-600 mb-1 ">Últimos movimientos</h2>
-            <div className="p-0 m-0 flex gap-1">
-              <button
-                className="hover:bg-gray-100 cursor-pointer"
-                onClick={() => {
-                  if (movimientos?.previous !== null)
-                    return getMovimientos(movimientos?.previous);
-                }}
-              >
-                <ChevronLeft size={18} />
-              </button>
-              <button
-                className="hover:bg-gray-100 cursor-pointer"
-                onClick={() => {
-                  if (movimientos?.next !== null)
-                    return getMovimientos(movimientos?.next);
-                }}
-              >
-                <ChevronRight size={18} />
-              </button>
-            </div>
-          </div>
-
-          <section className="h-[200px] overflow-y-scroll mb-4 outline outline-gray-300 drop-shadow-md">
-            <table className="w-full text-center border-collapse">
-              <thead className="sticky top-0 bg-white">
-                <tr className="border-b text-gray-600">
-                  <th className="py-2">Tipo</th>
-                  <th className="py-2">Monto</th>
-                  <th className="py-2">Fecha</th>
-                  <th className="py-2">Categoría</th>
-                </tr>
-              </thead>
-              <tbody className="min-h-[160px]">
-                {movimientos?.results.map((movimiento) => (
-                  <tr
-                    key={movimiento.id}
-                    className="border-b border-gray-300 hover:bg-gray-100"
-                  >
-                    <td className="py-1">{movimiento.tipo}</td>
-                    <td className="py-1">{movimiento.monto}</td>
-                    <td className="py-1">
-                      {new Date(movimiento.fecha).toLocaleDateString()}
-                    </td>
-                    <td className="py-1">{movimiento.categoria}</td>
-                  </tr>
-                ))}
-
-                {/* 👇 Filler rows para mantener el alto visual */}
-                {movimientos &&
-                  movimientos?.results.length < 4 &&
-                  Array.from({ length: 4 - movimientos.results.length }).map(
-                    (_, idx) => (
-                      <tr
-                        key={`filler-${idx}`}
-                        className="border-b border-transparent"
-                      >
-                        <td className="py-1">&nbsp;</td>
-                        <td className="py-1">&nbsp;</td>
-                        <td className="py-1">&nbsp;</td>
-                        <td className="py-1">&nbsp;</td>
-                      </tr>
-                    )
-                  )}
-              </tbody>
-            </table>
-          </section>
+          <MovimientosComponent
+            movimientos={movimientos!}
+            onPaginate={(url) => getMovimientos(url).then(setMovimientos)}
+          />
 
           {/* Gastos por categoría */}
           <section className="h-[calc(100%-300px)]">
@@ -154,16 +71,19 @@ export default function Dashboard() {
             <div className="grid grid-cols-[0.7fr_1.2fr] gap-4 h-[calc(100%-32px)]">
               {/* Cuadro grande a la izquierda */}
               <div className="bg-gray-100 rounded shadow overflow-y-scroll outline outline-gray-300 p-4 drop-shadow-md">
-                <table className="w-full text-left">
-                  <thead>
-                    <tr>
+                <table className="w-full text-center border-collapse">
+                  <thead className="sticky top-0">
+                    <tr className="border-b text-gray-600">
                       <th>Nombre</th>
                       <th>Monto</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="border-b border-gray-300 hover:bg-gray-100">
                     {gastosCategoria.map((elemento) => (
-                      <tr>
+                      <tr
+                        key={elemento.categoria}
+                        className="border-b border-gray-300 hover:bg-gray-100"
+                      >
                         <td>{elemento.categoria}</td>
                         <td>{elemento.total}</td>
                       </tr>
@@ -189,7 +109,7 @@ export default function Dashboard() {
         <aside className="w-80 p-4 bg-white space-y-4 h-full overflow-y-auto">
           {cuentas.map((cuenta) => (
             <Link
-              to={`/cuenta/${cuenta.id}`}
+              to={`/tabs/cuenta/${cuenta.id}`}
               className="block bg-gray-300 p-4 rounded hover:bg-gray-200 h-35 outline outline-gray-300 drop-shadow-md"
               key={cuenta.id}
             >
@@ -201,13 +121,16 @@ export default function Dashboard() {
                 }).format(cuenta.saldo)}
               </p>
               <div className="pt-4 text-sm">
-                <a
-                  href={cuenta.banco.url}
-                  target="_blank"
-                  className="italic leading-0"
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.open(cuenta.banco.url, "_blank");
+                  }}
+                  className="italic leading-0 underline text-blue-500 hover:text-blue-700 cursor-pointer"
                 >
                   {cuenta.banco.nombre_banco}
-                </a>
+                </button>
                 <p className="italic leading-2">{cuenta.tipo_cuenta.tipo}</p>
               </div>
             </Link>
@@ -221,6 +144,6 @@ export default function Dashboard() {
           </div>
         </aside>
       </div>
-    </div>
+    </Container>
   );
 }

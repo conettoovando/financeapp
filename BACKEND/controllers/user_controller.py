@@ -79,6 +79,7 @@ def create_user(db: Session, user: UserCreate):
     )
 
 def login_user(db: Session, user_id: str):
+    print(user_id)
     if user_id:
         user_in_db = db.get(Users, user_id)
 
@@ -89,8 +90,10 @@ def login_user(db: Session, user_id: str):
             db.refresh(new_user)
 
             return {"sucess", "registrado correctamente"}
+        
+        return {"sucess", "usuario previamente registrado"}
 
-        raise HTTPException(status_code=400, detail="Usuario ya registrado")
+    raise HTTPException(status_code=400, detail="Error en la peticion")
 
 def me(request: Request):
     token = request.cookies.get("access_token")
