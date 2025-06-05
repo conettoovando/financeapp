@@ -14,7 +14,7 @@ export default function MovimientosComponent({
   modo = "dashboard", // "dashboard" o "detalle"
 }: MovimientosComponentProps) {
   const contenedorClases = clsx(
-    "overflow-y-scroll mb-4 outline outline-gray-300 drop-shadow-md",
+    "overflow-y-scroll mb-1 outline outline-gray-300 drop-shadow-md",
     {
       "h-[200px]": modo === "dashboard",
       "h-full": modo === "detalle", // toma todo el espacio vertical disponible
@@ -23,9 +23,9 @@ export default function MovimientosComponent({
 
   return (
     <>
-      <div className="flex justify-between items-end m-0 g-">
-        <h2 className="text-gray-600 mb-1">Últimos movimientos</h2>
-        <div className="p-0 m-0 flex gap-1">
+      <div className="flex justify-between items-end m-0 ">
+        <h2 className="text-gray-600 m-0">Últimos movimientos</h2>
+        <div className="flex ">
           <button
             className="hover:bg-gray-100 cursor-pointer"
             onClick={() =>

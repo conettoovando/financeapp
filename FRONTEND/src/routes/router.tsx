@@ -11,6 +11,7 @@ import Dashboard from "../pages/Dashboard/Dashboard";
 import VerCuenta from "../pages/Cuentas/VerCuenta";
 import CrearCuenta from "../pages/Cuentas/CrearCuenta";
 import Register from "../pages/Dashboard/auth/Register";
+import CrearMovimiento from "../pages/Movimientos/CrearMovimiento";
 
 const router = createBrowserRouter([
   // 🔓 Rutas públicas
@@ -58,6 +59,10 @@ const router = createBrowserRouter([
           { path: "add-cuenta", element: <CrearCuenta /> },
           { path: ":cuenta_id", element: <VerCuenta /> },
         ],
+      },
+      {
+        path: "actions",
+        children: [{ path: "crear-movimiento", element: <CrearMovimiento /> }],
       },
     ],
   },

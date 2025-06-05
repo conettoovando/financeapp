@@ -97,7 +97,7 @@ export default function CrearCuenta() {
   }, []);
 
   return (
-    <main className="container h-screen grid place-items-center mx-auto">
+    <main className="container h-screen grid place-items-center mx-auto overflow-y-auto">
       <form
         className="flex flex-col gap-5 items-center border border-slate-700 rounded-md w-full max-w-md px-8 py-10"
         onSubmit={onSubmit}
@@ -119,7 +119,7 @@ export default function CrearCuenta() {
               type="nombre_cuenta"
               id="nombre_cuenta"
               className={`border rounded-sm px-2 py-3 text-sm outline-none font-medium text-slate-600`}
-              placeholder="correo@dominio.com"
+              placeholder="Mi cuenta"
               {...register("nombre_cuenta", {
                 required: "Se requiere asignarle un nombre a la cuenta",
               })}
@@ -310,6 +310,9 @@ export default function CrearCuenta() {
             Ingresar
           </button>
           <button
+            onClick={() => {
+              window.history.back();
+            }}
             type="button"
             className="underline font-medium cursor-pointer"
           >

@@ -54,8 +54,11 @@ export default function Dashboard() {
     <Container>
       <div className="flex h-full">
         {/* Contenido central */}
-        <main className="flex-1 p-6 space-y-6">
-          <button className="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-600 hover:shadow-md shadow-sm shadow-gray-400">
+        <main className="flex-1 px-6 space-y-6">
+          <button
+            onClick={() => navigate("/tabs/actions/crear-movimiento")}
+            className="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-600 hover:shadow-md shadow-sm shadow-gray-400"
+          >
             Registrar transacción
           </button>
 
@@ -63,12 +66,13 @@ export default function Dashboard() {
           <MovimientosComponent
             movimientos={movimientos!}
             onPaginate={(url) => getMovimientos(url).then(setMovimientos)}
+            modo="dashboard"
           />
 
           {/* Gastos por categoría */}
           <section className="h-[calc(100%-300px)]">
             <h2 className="text-gray-600 mb-2">Gastos por categoría</h2>
-            <div className="grid grid-cols-[0.7fr_1.2fr] gap-4 h-[calc(100%-32px)]">
+            <div className="grid grid-cols-[1fr_1.2fr] gap-4 h-[calc(100%-32px)]">
               {/* Cuadro grande a la izquierda */}
               <div className="bg-gray-100 rounded shadow overflow-y-scroll outline outline-gray-300 p-4 drop-shadow-md">
                 <table className="w-full text-center border-collapse">
@@ -84,7 +88,7 @@ export default function Dashboard() {
                         key={elemento.categoria}
                         className="border-b border-gray-300 hover:bg-gray-100"
                       >
-                        <td>{elemento.categoria}</td>
+                        <td className="text-left">{elemento.categoria}</td>
                         <td>{elemento.total}</td>
                       </tr>
                     ))}
