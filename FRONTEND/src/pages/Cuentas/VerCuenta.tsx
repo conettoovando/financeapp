@@ -105,7 +105,7 @@ export default function VerCuenta() {
         <div className="flex align-middle w-[25%] px-10 mt-5  justify-between">
           <button
             onClick={() => {
-              navigator("/");
+              navigator("/tabs/actions/crear-movimiento");
             }}
             className="bg-orange-400 rounded-full p-2 cursor-pointer text-white hover:bg-orange-300 hover:text-gray-200"
           >
