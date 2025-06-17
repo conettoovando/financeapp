@@ -199,4 +199,3 @@ def eliminar_movimiento(db: Session, user_id: str, mov_id: str):
     return {"message": "Movimiento eliminado correctamente"}
 
 
-

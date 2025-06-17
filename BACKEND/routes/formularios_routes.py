@@ -7,7 +7,7 @@ from schemas.user_schema import VerifyToken
 from controllers import formularios_controller
 from database.finance import get_db
 from controllers import user_controller
-from schemas.formularios_schema import CreateCuentaResponse
+from schemas.formularios_schema import CreateCuentaResponse, CreateMovimientoResponse
 
 
 router = APIRouter()
@@ -20,4 +20,14 @@ async def crear_cuentas(
     if user:
         return formularios_controller.crearCuenta(db, user.user_id)
     
+    raise HTTPException(status_code=401, detail="Acceso no autorizado")
+
+@router.get("/crearMovimiento", response_model=CreateMovimientoResponse)
+async def crear_movimiento(
+    db: Session = Depends(get_db),
+    user: VerifyToken = Depends(user_controller.verify_token)
+):
+    if user:
+        return formularios_controller.crearMovimiento(db, user.user_id)
+
     raise HTTPException(status_code=401, detail="Acceso no autorizado")

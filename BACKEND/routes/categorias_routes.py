@@ -4,6 +4,7 @@ from typing import List, Optional
 from fastapi.exceptions import HTTPException
 from sqlalchemy.orm import Session
 from schemas.categoria_schema import (
+    CategoriasResponse,
     CreateCategoryModel
 )
 from schemas.user_schema import VerifyToken
@@ -13,7 +14,7 @@ from controllers import user_controller
 
 router = APIRouter()
 
-@router.get("/")
+@router.get("/", response_model=list[CategoriasResponse])
 def obtener_categorias(
     db: Session = Depends(get_db),
     user: VerifyToken = Depends(user_controller.verify_token)

@@ -22,11 +22,13 @@ class CuentaResponse(BaseModel):
 class TipoMovimientoResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
+    id: str
     tipo: str
 
 class CategoriaResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
+    id: str
     nombre: str
 
 class NuevoMovimientoResponse(BaseModel):

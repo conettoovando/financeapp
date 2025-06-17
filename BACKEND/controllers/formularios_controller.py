@@ -1,9 +1,11 @@
 from fastapi import Request, HTTPException
 from sqlalchemy.orm import Session, joinedload
-from models.cuenta import TipoCuenta
+from models.categoria import Categoria
+from models.cuenta import Cuenta, TipoCuenta
 from models.banco import Banco
 from sqlalchemy import select
-from schemas.formularios_schema import CreateCuentaResponse
+from models.movimiento import TipoMovimiento
+from schemas.formularios_schema import CreateCuentaResponse, CreateMovimientoResponse
 
 def crearCuenta(
         db: Session,
@@ -23,4 +25,27 @@ def crearCuenta(
     return CreateCuentaResponse(
         tipo_cuenta=tipo_cuenta,
         banco=banco
+    )
+
+def crearMovimiento(
+        db: Session,
+        user: str
+):
+    cuentas = list(db.execute(select(Cuenta)).scalars().all())
+    tipo_movimientos = list(db.execute(
+        select(TipoMovimiento)
+    ).scalars().all())
+    categorias = list(db.execute(
+        select(Categoria)
+        .where((Categoria.usuario_id == user or Categoria.usuario_id == None))
+    ).scalars().all())
+
+    cuentas_schema = [CreateMovimientoResponse.__annotations__['cuentas'].__args__[0].from_orm(c) for c in cuentas]
+    tipo_movimiento_schema = [CreateMovimientoResponse.__annotations__['tipo_movimientos'].__args__[0].from_orm(c) for c in tipo_movimientos]
+    categorias_schema = [CreateMovimientoResponse.__annotations__['categorias'].__args__[0].from_orm(c) for c in categorias]
+
+    return CreateMovimientoResponse(
+        cuentas=cuentas_schema,
+        tipo_movimientos=tipo_movimiento_schema,
+        categorias=categorias_schema
     )
