@@ -144,19 +144,6 @@ export default function CrearMovimiento() {
     // Añadir dependencias necesarias para useEffect
   }, [reset, cuentaIdFromQuery, setValue]); // `setValue` es una dependencia estable proporcionada por `useForm`
 
-  const formatearDDMMYYYY_HHMM = (fechaStr: string) => {
-    const date = new Date(fechaStr);
-    if (isNaN(date.getTime())) return "";
-
-    const dd = String(date.getDate()).padStart(2, "0");
-    const mm = String(date.getMonth() + 1).padStart(2, "0");
-    const yyyy = date.getFullYear();
-    const hh = String(date.getHours()).padStart(2, "0");
-    const min = String(date.getMinutes()).padStart(2, "0");
-
-    return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
-  };
-
   return (
     <Container>
       <div className="flex bg-red-600 justify-center h-full">
