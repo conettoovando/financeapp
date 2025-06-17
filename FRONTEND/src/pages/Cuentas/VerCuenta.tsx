@@ -1,4 +1,3 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import Container from "../../components/Container";
@@ -6,6 +5,8 @@ import MovimientosComponent from "../../components/Movimientos";
 import type { Movimientos } from "../../types";
 import { getMovimientos } from "../../services/movimientosService";
 import { CirclePlus, SquarePen, Trash2 } from "lucide-react";
+import financeApi from "../../api/financeApi";
+import { useAuth } from "../../context/useAuth";
 
 type params = {
   cuenta_id: string;
@@ -32,27 +33,36 @@ export default function VerCuenta() {
   const [cuenta, setCuenta] = useState<cuenta>();
   const [movimientos, setMovimientos] = useState<Movimientos>();
   const navigator = useNavigate();
+  const { isAuthenticated, isLoading } = useAuth();
 
   useEffect(() => {
+    if (isLoading || !isAuthenticated) return;
+
     async function obtenerCuenta() {
-      const response = await axios.get<cuenta>(
-        `http://localhost:8001/api/cuentas/${params.cuenta_id}`,
-        { withCredentials: true }
-      );
-      setCuenta(response.data);
+      try {
+        const response = await financeApi.get<cuenta>(
+          `/cuentas/${params.cuenta_id}`
+        );
+        setCuenta(response.data);
+      } catch (error) {
+        console.error("Error al obtener cuenta", error);
+      }
     }
 
     async function obtenerMovimientos() {
-      const data = await getMovimientos(
-        `http://localhost:8001/api/movimientos?cuenta_id=${params.cuenta_id}&limit10&offset=0&orden=desc`
-      );
-      console.log(data);
-      setMovimientos(data);
+      try {
+        const data = await getMovimientos(
+          `/movimientos?cuenta_id=${params.cuenta_id}&limit=10&offset=0&orden=desc`
+        );
+        setMovimientos(data);
+      } catch (error) {
+        console.error("Error al obtener movimientos", error);
+      }
     }
 
     obtenerCuenta();
     obtenerMovimientos();
-  }, [params.cuenta_id]);
+  }, [params.cuenta_id, isAuthenticated, isLoading]);
 
   return (
     <Container>

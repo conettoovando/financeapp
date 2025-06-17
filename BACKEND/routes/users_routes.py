@@ -7,7 +7,7 @@ from controllers import user_controller
 from schemas.user_schema import UserCreate, UserLogin, UserLoginBody, VerifyToken
 from database.finance import get_db
 
-router = APIRouter(prefix="/auth", tags=["users"])
+router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 @router.post("/register")

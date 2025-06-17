@@ -1,16 +1,13 @@
-import axios from "axios";
+import { isAxiosError } from "axios";
 import type { Movimientos } from "../types";
+import financeApi from "../api/financeApi";
 
-export async function getMovimientos(
-  url = "http://localhost:8001/api/movimientos"
-) {
+export async function getMovimientos(url = "/movimientos") {
   try {
-    const response = await axios.get<Movimientos>(url, {
-      withCredentials: true,
-    });
+    const response = await financeApi.get<Movimientos>(url);
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error)) {
+    if (isAxiosError(error)) {
       console.log("Status:", error.response?.status);
       console.log("Mensaje del servidor:", error.response?.data?.message);
     }

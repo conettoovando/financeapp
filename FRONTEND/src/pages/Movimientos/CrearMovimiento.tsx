@@ -1,9 +1,9 @@
 import Container from "../../components/Container";
 import { Controller, useForm } from "react-hook-form";
-import axios from "axios";
 import { useEffect, useState } from "react";
 import Select from "react-select";
 import { useNavigate, useSearchParams } from "react-router"; // Importa useSearchParams
+import financeApi from "../../api/financeApi";
 
 type CrearMovimiento = {
   cuenta_id: string;
@@ -83,11 +83,7 @@ export default function CrearMovimiento() {
   const [categoria, setCategorias] = useState<CategoriasResponse[]>([]);
 
   const onSubmit = handleSubmit(async (data) => {
-    const response = await axios.post(
-      "http://localhost:8001/api/movimientos/",
-      data,
-      { withCredentials: true }
-    );
+    const response = await financeApi.post("/movimientos/", data);
 
     if (response.status === 200) {
       reset();
@@ -99,11 +95,8 @@ export default function CrearMovimiento() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get<CrearMovimientoFormResponse>(
-          "http://localhost:8001/api/forms/crearMovimiento",
-          {
-            withCredentials: true,
-          }
+        const response = await financeApi.get<CrearMovimientoFormResponse>(
+          "/forms/crearMovimiento"
         );
         if (response.status === 200) {
           const {

@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
-import type { Cuenta, Movimientos, GastosCategoria } from "../../types";
 import { Link, useNavigate } from "react-router";
+import financeApi from "../../api/financeApi";
 import Container from "../../components/Container";
-import { getMovimientos } from "../../services/movimientosService";
 import MovimientosComponent from "../../components/Movimientos";
+import { getMovimientos } from "../../services/movimientosService";
+import type { Cuenta, GastosCategoria, Movimientos } from "../../types";
 
 export default function Dashboard() {
   const [cuentas, setCuentas] = useState<Cuenta[]>([]);
@@ -13,12 +13,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
 
   async function getCuentas() {
-    const response = await axios.get<Cuenta[]>(
-      "http://localhost:8001/api/cuentas",
-      {
-        withCredentials: true,
-      }
-    );
+    const response = await financeApi.get<Cuenta[]>("/cuentas");
 
     if (response.status === 200) {
       setCuentas(response.data);
@@ -26,9 +21,8 @@ export default function Dashboard() {
   }
 
   async function getGastosPorCategoria() {
-    const response = await axios.get<GastosCategoria[]>(
-      "http://localhost:8001/api/estadisticas/gastos-por-categoria",
-      { withCredentials: true }
+    const response = await financeApi.get<GastosCategoria[]>(
+      "/estadisticas/gastos-por-categoria"
     );
 
     if (response.status === 200) {

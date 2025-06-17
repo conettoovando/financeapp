@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter, Outlet } from "react-router";
 import RootLayout from "../layouts/RootLayout";
 import PrivateLayout from "../layouts/PrivateLayout";
 import NotFound from "../pages/NotFound";
@@ -14,55 +14,57 @@ import Register from "../pages/Dashboard/auth/Register";
 import CrearMovimiento from "../pages/Movimientos/CrearMovimiento";
 
 const router = createBrowserRouter([
-  // 🔓 Rutas públicas
   {
     path: "/",
     element: (
       <AuthProvider>
-        <PublicRoute />
+        <Outlet /> {/* solo actúa como punto común para rutas hijas */}
       </AuthProvider>
     ),
     errorElement: <NotFound />,
-    children: [
-      {
-        path: "/",
-        element: <RootLayout />,
-        children: [
-          { index: true, element: <Home /> },
-          { path: "login", element: <Login /> },
-          { path: "register", element: <Register /> },
-        ],
-      },
-    ],
-  },
 
-  // 🔐 Rutas privadas
-  {
-    path: "/tabs",
-    element: (
-      <AuthProvider>
-        <ProtectedRoute>
-          <PrivateLayout />
-        </ProtectedRoute>
-      </AuthProvider>
-    ),
     children: [
+      // 🔓 Rutas públicas con layout RootLayout
       {
-        index: true,
-        path: "dashboard",
-        element: <Dashboard />,
-      },
-      {
-        path: "cuenta",
+        element: <PublicRoute />, // Verifica si está autenticado
         children: [
-          { index: true, element: <h1>Pagina principal de cuenta</h1> },
-          { path: "add-cuenta", element: <CrearCuenta /> },
-          { path: ":cuenta_id", element: <VerCuenta /> },
+          {
+            element: <RootLayout />, // Navbar para login/register
+            children: [
+              { index: true, element: <Home /> },
+              { path: "login", element: <Login /> },
+              { path: "register", element: <Register /> },
+            ],
+          },
         ],
       },
+
+      // 🔐 Rutas privadas
       {
-        path: "actions",
-        children: [{ path: "crear-movimiento", element: <CrearMovimiento /> }],
+        path: "tabs",
+        element: <ProtectedRoute />, // Verifica si está logueado
+        children: [
+          {
+            element: <PrivateLayout />, // Sidebar + outlet
+            children: [
+              { index: true, path: "dashboard", element: <Dashboard /> },
+              {
+                path: "cuenta",
+                children: [
+                  { index: true, element: <h1>Pagina principal de cuenta</h1> },
+                  { path: "add-cuenta", element: <CrearCuenta /> },
+                  { path: ":cuenta_id", element: <VerCuenta /> },
+                ],
+              },
+              {
+                path: "actions",
+                children: [
+                  { path: "crear-movimiento", element: <CrearMovimiento /> },
+                ],
+              },
+            ],
+          },
+        ],
       },
     ],
   },

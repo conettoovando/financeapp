@@ -1,7 +1,9 @@
 import { useEffect, useState, type ReactNode } from "react";
-import axios from "axios";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { AuthContext } from "./AuthContext";
+import { isAxiosError } from "axios";
+import authApi from "../api/authApi";
+import financeApi from "../api/financeApi";
 import type {
   User,
   MeResponse,
@@ -13,42 +15,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
 
+  // 👉 Nunca hace navigate, solo carga el usuario si los tokens son válidos
   const fetchUser = async () => {
     if (document.cookie.includes("token_type")) {
       try {
-        const res = await axios.get<MeResponse>("http://localhost:8000/me", {
-          withCredentials: true,
-        });
+        const res = await authApi.get<MeResponse>("/me");
         setUser(res.data.user);
       } catch (error) {
-        if (axios.isAxiosError(error) && error.response?.status === 401) {
-          // Token expirado: intento refrescar
+        if (isAxiosError(error) && error.response?.status === 401) {
           try {
-            await axios.post(
-              "http://localhost:8000/refresh",
-              {},
-              {
-                withCredentials: true,
-              }
-            );
-
-            // Si refresca con éxito, intento nuevamente obtener el usuario
-            const res = await axios.get<MeResponse>(
-              "http://localhost:8000/me",
-              {
-                withCredentials: true,
-              }
-            );
+            await authApi.post("/refresh");
+            const res = await authApi.get<MeResponse>("/me");
             setUser(res.data.user);
-            return;
           } catch {
-            // Refresh falló, limpiar sesión
-            setUser(null);
+            setUser(null); // refresh falló
           }
         } else {
-          // Otros errores
-          setUser(null);
+          setUser(null); // otro error
         }
       } finally {
         setIsLoading(false);
@@ -64,24 +49,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     password: string;
   }): Promise<LoginResponse> => {
     try {
-      const response = await axios.post(
-        "http://localhost:8000/login",
-        credentials,
-        {
-          withCredentials: true,
-        }
-      );
+      const response = await authApi.post("/login", credentials);
+
       if (response.status === 200) {
-        await axios.post(
-          "http://localhost:8001/auth/login",
-          { user_id: response.data.id },
-          { withCredentials: true }
-        );
+        await financeApi.post("/auth/login", { user_id: response.data.id });
       }
-      await fetchUser();
-      navigate("/dashboard");
+
+      await fetchUser(); // ya no navega aquí adentro
+
+      // Solo login redirige a donde el usuario quería ir
+      const from = location.state?.from?.pathname || "/dashboard";
+      navigate(from, { replace: true });
+
+      return { success: true };
     } catch (error) {
-      if (axios.isAxiosError(error)) {
+      if (isAxiosError(error)) {
         return {
           success: false,
           error: error.response?.data.detail,
@@ -106,14 +88,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         error: "Las contraseñas no coinciden",
       };
     }
+
     try {
-      const response = await axios.post(
-        "http://localhost:8000/register",
-        credentials,
-        {
-          withCredentials: true,
-        }
-      );
+      const response = await authApi.post("/register", credentials);
+
       if (response.status === 201) {
         navigate("/login");
         return {
@@ -127,7 +105,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         };
       }
     } catch (error) {
-      if (axios.isAxiosError(error)) {
+      if (isAxiosError(error)) {
         return {
           success: false,
           error: error.response?.data.detail || "Error en el registro",
@@ -141,11 +119,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = async () => {
-    await axios.post(
-      "http://localhost:8001/auth/logout",
-      {},
-      { withCredentials: true }
-    );
+    await authApi.post("/logout", {});
     setUser(null);
     navigate("/");
   };

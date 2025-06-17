@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { useNavigate } from "react-router";
 import Select from "react-select";
+import financeApi from "../../api/financeApi";
 
 type Nuevacuenta = {
   nombre_cuenta: string;
@@ -64,12 +65,9 @@ export default function CrearCuenta() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      const response = await axios.post<NuevacuentaResponse>(
-        "http://localhost:8001/api/cuentas",
-        data,
-        {
-          withCredentials: true,
-        }
+      const response = await financeApi.post<NuevacuentaResponse>(
+        "/cuentas",
+        data
       );
 
       if (response.status === 200) {
@@ -82,10 +80,7 @@ export default function CrearCuenta() {
 
   useEffect(() => {
     async function obtenerDatos() {
-      const response = await axios.get<FormData>(
-        "http://localhost:8001/api/forms/createCuenta",
-        { withCredentials: true }
-      );
+      const response = await financeApi.get<FormData>("forms/createCuenta");
 
       if (response.status === 200) {
         setTipocuentas(response.data.tipo_cuenta);
